@@ -1,6 +1,6 @@
 require 'openssl'
 
-class Heroku::Bouncer::Lockbox < BasicObject
+class MusicGlue::Bouncer::Lockbox < BasicObject
 
   def initialize(key)
     @key = key
