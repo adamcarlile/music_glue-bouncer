@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-describe Heroku::Bouncer do
+describe MusicGlue::Bouncer do
   include Rack::Test::Methods
 
   context "allow_anonymous" do
@@ -14,7 +14,7 @@ describe Heroku::Bouncer do
       get '/allowed'
       assert_equal 'allowed', last_response.body
     end
-  
+
     it "requires authentication to those requests that don't fulfill the requirements" do
       get '/hi'
       assert_requires_authentication

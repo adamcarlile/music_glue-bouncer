@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-describe Heroku::Bouncer do
+describe MusicGlue::Bouncer do
   include Rack::Test::Methods
 
   context "session_sync_nonce" do

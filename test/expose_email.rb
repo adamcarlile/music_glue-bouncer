@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-describe Heroku::Bouncer do
+describe MusicGlue::Bouncer do
   include Rack::Test::Methods
 
   context "expose_email: true" do

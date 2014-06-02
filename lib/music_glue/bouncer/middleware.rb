@@ -2,12 +2,12 @@ require 'sinatra/base'
 require 'faraday'
 require 'securerandom'
 
-require 'heroku/bouncer/json_parser'
-require 'heroku/bouncer/decrypted_hash'
+require 'music_glue/bouncer/json_parser'
+require 'music_glue/bouncer/decrypted_hash'
 
-class Heroku::Bouncer::Middleware < Sinatra::Base
+class MusicGlue::Bouncer::Middleware < Sinatra::Base
 
-  DecryptedHash = ::Heroku::Bouncer::DecryptedHash
+  DecryptedHash = ::MusicGlue::Bouncer::DecryptedHash
 
   enable :raise_errors
   disable :show_exceptions
@@ -20,7 +20,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     else
       super(app)
       @cookie_secret = extract_option(options, :secret, SecureRandom.base64(32))
-      @herokai_only = extract_option(options, :herokai_only, false)
+      @mg_all_stars_only = extract_option(options, :mg_all_stars_only, false)
       @expose_token = extract_option(options, :expose_token, false)
       @expose_email = extract_option(options, :expose_email, true)
       @expose_user = extract_option(options, :expose_user, true)
@@ -62,12 +62,12 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   end
 
   # callback when successful, time to save data
-  get '/auth/heroku/callback' do
+  get '/auth/music_glue/callback' do
     token = request.env['omniauth.auth']['credentials']['token']
-    if @expose_email || @expose_user || @herokai_only
+    if @expose_email || @expose_user || @mg_all_stars_only
       user = fetch_user(token)
-      if @herokai_only && !user['email'].end_with?("@heroku.com")
-        url = @herokai_only.is_a?(String) ? @herokai_only : 'https://www.heroku.com'
+      if @mg_all_stars_only && !user['email'].end_with?("@musicglue.com")
+        url = @mg_all_stars_only.is_a?(String) ? @mg_all_stars_only : 'https://www.musicglue.com'
         redirect to(url) and return
       end
       @expose_user ? store_write(:user, user) : store_write(:user, true)
@@ -92,7 +92,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
   # logout, single sign-on style
   get '/auth/sso-logout' do
     destroy_session
-    auth_url = ENV["HEROKU_AUTH_URL"] || "https://id.heroku.com"
+    auth_url = ENV["MUSIC_GLUE_AUTH_URL"] || "https://id.musicglue.com"
     logout_url = "#{auth_url}/logout"
 
     # id.heroku.com whitelists this return_to param, as any auth provider should do
@@ -112,7 +112,7 @@ class Heroku::Bouncer::Middleware < Sinatra::Base
     if params['return_to'] && params['return_to'].length <= 255
       store_write(:return_to, params['return_to'])
     end
-    redirect to('/auth/heroku')
+    redirect to('/auth/music_glue')
   end
 
 private
@@ -125,7 +125,7 @@ private
   end
 
   def auth_request?
-    %w[/auth/heroku/callback /auth/heroku /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path)
+    %w[/auth/music_glue/callback /auth/music_glue /auth/failure /auth/sso-logout /auth/logout /auth/login].include?(request.path)
   end
 
   def session_nonce_mismatch?
@@ -151,7 +151,7 @@ private
 
   def require_authentication
     store_write(:return_to, request.url)
-    redirect to('/auth/heroku')
+    redirect to('/auth/music_glue')
   end
 
   def extract_option(options, option, default = nil)
@@ -159,8 +159,8 @@ private
   end
 
   def fetch_user(token)
-    ::Heroku::Bouncer::JsonParser.call(
-      Faraday.new(ENV["HEROKU_API_URL"] || "https://api.heroku.com/").get('/account') do |r|
+    ::MusicGlue::Bouncer::JsonParser.call(
+      Faraday.new(ENV["MUSIC_GLUE_ACCOUNTS_API_URL"] || "https://gatekeeper.heroku.com/").get('/account') do |r|
         r.headers['Accept'] = 'application/json'
         r.headers['Authorization'] = "Bearer #{token}"
       end.body)

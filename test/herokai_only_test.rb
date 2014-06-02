@@ -1,13 +1,13 @@
 require_relative "test_helper"
 
-describe Heroku::Bouncer do
+describe MusicGlue::Bouncer do
   include Rack::Test::Methods
 
-  context "herokai_only: true" do
+  context "mg_all_stars_only: true" do
     before do
       @app = app_with_bouncer do
         {
-          herokai_only: true
+          mg_all_stars_only: true
         }
       end
     end
@@ -15,7 +15,7 @@ describe Heroku::Bouncer do
     context "after a successful OAuth dance returning a Herokai" do
       before do
         get '/hi'
-        follow_successful_oauth!({'email' => 'joe@heroku.com'})
+        follow_successful_oauth!({'email' => 'joe@musicglue.com'})
       end
 
       it "gives access to the app" do
@@ -32,8 +32,8 @@ describe Heroku::Bouncer do
         follow_successful_oauth!({'email' => 'joe@a.com'})
       end
 
-      it "redirects to 'https://www.heroku.com'" do
-        assert_equal 'https://www.heroku.com', last_response.location
+      it "redirects to 'https://www.musicglue.com'" do
+        assert_equal 'https://www.musicglue.com', last_response.location
       end
     end
   end
@@ -42,7 +42,7 @@ describe Heroku::Bouncer do
     before do
       @app = app_with_bouncer do
         {
-          herokai_only: 'https://bummer.heroku.com'
+          mg_all_stars_only: 'https://secure.musicglue.com'
         }
       end
     end
@@ -50,7 +50,7 @@ describe Heroku::Bouncer do
     context "after a successful OAuth dance returning a Herokai" do
       before do
         get '/hi'
-        follow_successful_oauth!({'email' => 'joe@heroku.com'})
+        follow_successful_oauth!({'email' => 'joe@musicglue.com'})
       end
 
       it "gives access to the app" do
@@ -68,7 +68,7 @@ describe Heroku::Bouncer do
       end
 
       it "redirects to the given URL" do
-        assert_equal 'https://bummer.heroku.com', last_response.location
+        assert_equal 'https://secure.musicglue.com', last_response.location
       end
     end
   end

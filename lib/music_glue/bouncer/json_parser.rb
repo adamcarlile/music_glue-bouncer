@@ -1,5 +1,5 @@
 # json parsers, all the way down
-Heroku::Bouncer::JsonParser = begin
+MusicGlue::Bouncer::JsonParser = begin
   require 'oj'
   lambda { |json| Oj.load(json, :mode => :strict) }
 rescue LoadError

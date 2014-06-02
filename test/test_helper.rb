@@ -12,9 +12,9 @@ require 'mocha/setup'
 require 'delorean'
 
 # seed the environment
-ENV['HEROKU_AUTH_URL'] = 'https://auth.example.org'
+ENV['MUSIC_GLUE_AUTH_URL'] = 'https://auth.example.org'
 
-require_relative '../lib/heroku/bouncer'
+require_relative '../lib/music_glue/bouncer'
 
 OmniAuth.config.test_mode = true
 
@@ -28,7 +28,7 @@ class MiniTest::Spec
     Sinatra.new do
       use Rack::Session::Cookie, domain: MiniTest::Spec.app_host, secret: 'guess-me'
       use Heroku::Bouncer, bouncer_config
-      get '/:whatever' do 
+      get '/:whatever' do
         params['whatever'] || 'root'
       end
     end
@@ -55,8 +55,8 @@ class MiniTest::Spec
 
   def follow_successful_oauth!(fetched_user_info = {})
     # /auth/heroku (OAuth dance starts)
-    OmniAuth.config.mock_auth[:heroku] = OmniAuth::AuthHash.new(provider: 'heroku', credentials: {token:'12345'})
-    assert_equal "http://#{app_host}/auth/heroku", last_response.location, "The user didn't trigger the OmniAuth authentication"
+    OmniAuth.config.mock_auth[:music_glue] = OmniAuth::AuthHash.new(provider: 'music_glue', credentials: {token:'12345'})
+    assert_equal "http://#{app_host}/auth/music_glue", last_response.location, "The user didn't trigger the OmniAuth authentication"
     follow_redirect!
 
     # stub the user info that will be fetched from Heroku's API with the token returned with the authentication
@@ -64,13 +64,13 @@ class MiniTest::Spec
     Heroku::Bouncer::Middleware.any_instance.stubs(:fetch_user).returns(fetched_user_info)
 
     # /auth/callback (OAuth dance finishes)
-    assert last_response.location.include?('/auth/heroku/callback'), "The authentication didn't trigger the callback"
+    assert last_response.location.include?('/auth/music_glue/callback'), "The authentication didn't trigger the callback"
     assert 302, last_response.status
     follow_redirect!
   end
 
   def default_fetched_user_info
-    { 'email' => 'joe@a.com', 'id' => 'uid_123@heroku.com', 'allow_tracking' => true, 'oauth_token' => '12345' }
+    { 'email' => 'joe@a.com', 'id' => 'uid_123@musicglue.com', 'allow_tracking' => true, 'oauth_token' => '12345' }
   end
 
   def assert_redirected_to_path(path)
@@ -79,7 +79,7 @@ class MiniTest::Spec
   end
 
   def assert_requires_authentication
-    assert_equal "http://#{app_host}/auth/heroku", last_response.location, "Authentication expected, wasn't required"
+    assert_equal "http://#{app_host}/auth/music_glue", last_response.location, "Authentication expected, wasn't required"
   end
 
 end

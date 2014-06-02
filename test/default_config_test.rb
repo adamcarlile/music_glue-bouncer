@@ -1,6 +1,6 @@
 require_relative "test_helper"
 
-describe Heroku::Bouncer do
+describe MusicGlue::Bouncer do
   include Rack::Test::Methods
 
   context "the default configuration" do
@@ -14,10 +14,10 @@ describe Heroku::Bouncer do
     end
 
     context "on any request not related with authentication" do
-      it "requires authentication via /auth/heroku, which gets managed by omniauth-heroku" do
+      it "requires authentication via /auth/music_glue, which gets managed by omniauth-music_glue" do
         get '/hi'
         assert 302, last_response.status
-        assert_equal "http://#{app_host}/auth/heroku", last_response.location
+        assert_equal "http://#{app_host}/auth/music_glue", last_response.location
       end
 
       context "after a successful OAuth dance" do
@@ -47,7 +47,7 @@ describe Heroku::Bouncer do
           # requires authentication
           get '/hi'
           assert 302, last_response.status
-          assert_equal "http://#{app_host}/auth/heroku", last_response.location
+          assert_equal "http://#{app_host}/auth/music_glue", last_response.location
 
           follow_successful_oauth!
           assert_redirected_to_path('/hi')
@@ -108,13 +108,13 @@ describe Heroku::Bouncer do
     context "a SSO-style logout" do
       it "redirects to the authentication endpoint's /logout path" do
         get '/auth/sso-logout'
-        assert_equal "#{ENV['HEROKU_AUTH_URL']}/logout", last_response.location
+        assert_equal "#{ENV['MUSIC_GLUE_AUTH_URL']}/logout", last_response.location
       end
 
       it "supports an optional `return_to` param to be used by the authentication endpoint's /logout path" do
         return_to = 'https://app.heroku.com'
         get "/auth/sso-logout?return_to=#{return_to}"
-        assert_equal "#{ENV['HEROKU_AUTH_URL']}/logout?url=#{return_to}", last_response.location
+        assert_equal "#{ENV['MUSIC_GLUE_AUTH_URL']}/logout?url=#{return_to}", last_response.location
       end
     end
 

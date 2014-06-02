@@ -1,10 +1,10 @@
-require 'heroku/bouncer/lockbox'
+require 'music_glue/bouncer/lockbox'
 
 # Encapsulates encrypting and decrypting a hash of data. Does not store the
 # key that is passed in.
-class Heroku::Bouncer::DecryptedHash < Hash
+class MusicGlue::Bouncer::DecryptedHash < Hash
 
-  Lockbox = ::Heroku::Bouncer::Lockbox
+  Lockbox = ::MusicGlue::Bouncer::Lockbox
 
   def initialize(decrypted_hash = nil)
     super
